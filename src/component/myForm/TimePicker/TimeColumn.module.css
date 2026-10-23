@@ -1,0 +1,26 @@
+.container { width: 100%; min-width: 0; text-align: center; }
+.label { font-weight: 600; margin-bottom: 6px; font-size: 0.8rem; color: #64748b; }
+.wheelWrap { position: relative; --time-row-height: 36px; }
+.selectionBand {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  height: var(--time-row-height); width: 100%; box-sizing: border-box;
+  background: rgba(120, 120, 128, 0.12); border-radius: 8px;
+  border-block: 1px solid rgba(120, 120, 128, 0.12); pointer-events: none;
+}
+.itemsContainer {
+  height: calc(var(--time-row-height) * 5); box-sizing: border-box;
+  padding-block: calc(var(--time-row-height) * 2);
+  overflow-y: auto; overscroll-behavior-y: contain;
+  scroll-snap-type: y mandatory; scrollbar-width: none;
+  position: relative; touch-action: pan-y;
+  mask-image: linear-gradient(transparent, #000 35%, #000 65%, transparent);
+}
+.itemsContainer::-webkit-scrollbar { display: none; }
+.itemsContainer:focus-visible { outline: 2px solid var(--form-primary, #1976d2); outline-offset: -2px; border-radius: 8px; }
+.itemButton {
+  height: var(--time-row-height); box-sizing: border-box;
+  display: flex; align-items: center; justify-content: center;
+  scroll-snap-align: center; color: #94a3b8; font-size: 1.1rem;
+  font-variant-numeric: tabular-nums; cursor: pointer; user-select: none;
+}
+.itemButton.active { color: #111827; font-weight: 700; font-size: 1.25rem; }
