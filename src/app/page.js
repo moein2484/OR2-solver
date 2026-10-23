@@ -7,51 +7,49 @@ const METHOD_TAGS = ["LP Relaxation", "Floor / Ceil Rounding", "GLPK"];
 
 export default function HomePage() {
   return (
-    <Box sx={{ minHeight: "100vh", py: { xs: 3, md: 6 } }}>
+    <Box sx={{ minHeight: "100vh", py: { xs: 2.5, md: 6 } }}>
       <Container maxWidth="lg">
-        <Stack
-          direction={{ xs: "column", sm: "row" }}
-          sx={{ mb: { xs: 3, md: 4 }, alignItems: { sm: "center" } }}
-          spacing={2}
+        <Box
+          component="header"
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "auto 1fr", md: "auto 1fr auto" },
+            gridTemplateAreas: {
+              xs: '"logo title" "desc desc" "tags tags"',
+              md: '"logo title tags" "logo desc tags"',
+            },
+            columnGap: { xs: 1.5, sm: 2 },
+            rowGap: { xs: 1, md: 0 },
+            alignItems: "center",
+            mb: { xs: 2.5, md: 4 },
+          }}
         >
           <Box
             sx={{
-              width: 52,
-              height: 52,
-              flexShrink: 0,
+              gridArea: "logo",
+              width: { xs: 44, sm: 52 },
+              height: { xs: 44, sm: 52 },
               display: "grid",
               placeItems: "center",
-              borderRadius: "14px",
+              borderRadius: { xs: "12px", sm: "14px" },
               bgcolor: "primary.main",
               color: "primary.contrastText",
             }}
           >
-            <FunctionsRoundedIcon fontSize="large" />
+            <FunctionsRoundedIcon sx={{ fontSize: { xs: 26, sm: 32 } }} />
           </Box>
 
-          <Box sx={{ flex: 1 }}>
-            <Typography variant="h4" component="h1">
-              OR2 Solver
-            </Typography>
+          <Typography variant="h4" component="h1" sx={{ gridArea: "title" }}>
+            OR2 Solver
+          </Typography>
 
-            <Typography color="text.secondary">
-              حل تقریبی مسائل برنامه‌ریزی عدد صحیح با LP Relaxation و روش گرد
-              کردن
-            </Typography>
-          </Box>
+          <Typography color="text.secondary" sx={{ gridArea: "desc" }}>
+            حل تقریبی مسائل برنامه‌ریزی عدد صحیح با LP Relaxation و روش گرد
+            کردن
+          </Typography>
 
-          <Stack direction="row" useFlexGap spacing={1} sx={{ flexWrap: "wrap" }}>
-            {METHOD_TAGS.map((tag) => (
-              <Chip
-                key={tag}
-                label={tag}
-                size="small"
-                variant="outlined"
-                sx={{ bgcolor: "background.paper" }}
-              />
-            ))}
-          </Stack>
-        </Stack>
+
+        </Box>
 
         <ModelForm />
       </Container>

@@ -34,7 +34,7 @@ export default function ModelForm() {
   }, [result, error]);
 
   return (
-    <Stack spacing={3}>
+    <Stack spacing={{ xs: 2, md: 3 }}>
       <Form
         type="normal"
         defaultValues={initialModel}

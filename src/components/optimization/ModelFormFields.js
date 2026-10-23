@@ -11,9 +11,9 @@ import { FormActions } from "@/component/myForm";
 
 export default function ModelFormFields() {
   return (
-    <Grid container spacing={3} sx={{ alignItems: "flex-start" }}>
+    <Grid container spacing={{ xs: 2, md: 3 }} sx={{ alignItems: "flex-start" }}>
       <Grid size={{ xs: 12, md: 8 }}>
-        <Stack spacing={3}>
+        <Stack spacing={{ xs: 2, md: 3 }}>
           <ObjectiveForm />
           <VariablesForm />
           <ConstraintsForm />

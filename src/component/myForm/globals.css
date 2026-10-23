@@ -42,3 +42,13 @@
   /* آپلود فایل */
   --form-upload-bg: var(--mui-palette-grey-50, #f9fafb);
 }
+
+/* موبایل: فونت اینپوت 16px تا iOS هنگام فوکوس صفحه را زوم نکند */
+@media (max-width: 599.95px) {
+  :root {
+    --form-font-size: 1rem;
+    --form-label-size: 0.875rem;
+    --form-helper-size: 0.8125rem;
+    --form-control-px: 10px;
+  }
+}

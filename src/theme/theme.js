@@ -6,6 +6,9 @@ import { alpha, createTheme } from "@mui/material/styles";
 export const CONTROL_HEIGHT = 40;
 export const RADIUS = 10;
 
+// موبایل: اینپوت‌ها 16px (جلوگیری از زوم خودکار iOS) و متن‌ها کمی درشت‌تر برای خوانایی
+const MOBILE = "@media (max-width:599.95px)";
+
 const BODY_FONT = "var(--font-yekan), Tahoma, sans-serif";
 const HEADING_FONT = "var(--font-peyda), var(--font-yekan), Tahoma, sans-serif";
 
@@ -47,16 +50,16 @@ const theme = createTheme({
     h1: { fontFamily: HEADING_FONT, fontWeight: 800 },
     h2: { fontFamily: HEADING_FONT, fontWeight: 800 },
     h3: { fontFamily: HEADING_FONT, fontWeight: 800, fontSize: "2rem", lineHeight: 1.4 },
-    h4: { fontFamily: HEADING_FONT, fontWeight: 800, fontSize: "1.625rem", lineHeight: 1.4 },
-    h5: { fontFamily: HEADING_FONT, fontWeight: 700, fontSize: "1.25rem", lineHeight: 1.5 },
-    h6: { fontFamily: HEADING_FONT, fontWeight: 700, fontSize: "1rem", lineHeight: 1.6 },
+    h4: { fontFamily: HEADING_FONT, fontWeight: 800, fontSize: "1.625rem", lineHeight: 1.4, [MOBILE]: { fontSize: "1.375rem" } },
+    h5: { fontFamily: HEADING_FONT, fontWeight: 700, fontSize: "1.25rem", lineHeight: 1.5, [MOBILE]: { fontSize: "1.125rem" } },
+    h6: { fontFamily: HEADING_FONT, fontWeight: 700, fontSize: "1rem", lineHeight: 1.6, [MOBILE]: { fontSize: "1rem" } },
     subtitle1: { fontWeight: 600, fontSize: "0.9375rem", lineHeight: 1.6 },
-    subtitle2: { fontWeight: 600, fontSize: "0.875rem", lineHeight: 1.6 },
-    body1: { fontSize: "0.875rem", lineHeight: 1.8 },
-    body2: { fontSize: "0.8125rem", lineHeight: 1.7 },
-    caption: { fontSize: "0.75rem", lineHeight: 1.6 },
+    subtitle2: { fontWeight: 600, fontSize: "0.875rem", lineHeight: 1.6, [MOBILE]: { fontSize: "0.9375rem" } },
+    body1: { fontSize: "0.875rem", lineHeight: 1.8, [MOBILE]: { fontSize: "0.9375rem" } },
+    body2: { fontSize: "0.8125rem", lineHeight: 1.7, [MOBILE]: { fontSize: "0.875rem" } },
+    caption: { fontSize: "0.75rem", lineHeight: 1.6, [MOBILE]: { fontSize: "0.8125rem" } },
     overline: { fontSize: "0.6875rem", fontWeight: 700, letterSpacing: 0.4 },
-    button: { fontSize: "0.875rem", fontWeight: 600, textTransform: "none" },
+    button: { fontSize: "0.875rem", fontWeight: 600, textTransform: "none", [MOBILE]: { fontSize: "0.9375rem" } },
   },
 
   components: {
@@ -109,7 +112,12 @@ const theme = createTheme({
 
     MuiTableCell: {
       styleOverrides: {
-        root: { fontSize: "0.8125rem", borderColor: palette.divider, paddingBlock: 10 },
+        root: {
+          fontSize: "0.8125rem",
+          borderColor: palette.divider,
+          paddingBlock: 10,
+          [MOBILE]: { fontSize: "0.875rem", paddingInline: 10 },
+        },
         head: {
           fontWeight: 700,
           color: palette.text.secondary,

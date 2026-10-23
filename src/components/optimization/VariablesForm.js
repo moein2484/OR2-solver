@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Divider, Stack, Typography } from "@mui/material";
 
 import AddIcon from "@mui/icons-material/Add";
 import {
@@ -9,21 +9,49 @@ import {
   useFormContext,
 } from "@/component/myForm";
 
-import { SectionCard, VarSymbol } from "./ui";
+import { RemoveButton, SectionCard, VarSymbol } from "./ui";
 
 const TYPE_OPTIONS = [
   { value: "integer", label: "عدد صحیح" },
   { value: "binary", label: "دودویی" },
 ];
 
-const GRID_COLUMNS = {
-  xs: "40px repeat(3, minmax(0, 1fr))",
-  sm: "56px minmax(0, 1.2fr) repeat(2, minmax(0, 1fr))",
+// دسکتاپ: یک ردیف جدولی | موبایل: دو خط (نماد، نوع، حذف / کران‌ها)
+const ROW_GRID = {
+  display: "grid",
+  gridTemplateColumns: {
+    xs: "40px repeat(2, minmax(0, 1fr)) 40px",
+    sm: "56px minmax(0, 1.2fr) repeat(2, minmax(0, 1fr)) 40px",
+  },
+  gridTemplateAreas: {
+    xs: '"symbol type type remove" "lower lower upper upper"',
+    sm: '"symbol type lower upper remove"',
+  },
+  alignItems: "center",
+  columnGap: { xs: 1, sm: 2 },
+  rowGap: 1.5,
 };
 
-function HeaderCell({ children }) {
+function HeaderCell({ area, children }) {
   return (
-    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+    <Typography
+      variant="caption"
+      color="text.secondary"
+      sx={{ gridArea: area, fontWeight: 600 }}
+    >
+      {children}
+    </Typography>
+  );
+}
+
+// لیبل کران‌ها فقط در موبایل که سرستون نمایش داده نمی‌شود
+function MobileLabel({ children }) {
+  return (
+    <Typography
+      variant="caption"
+      color="text.secondary"
+      sx={{ display: { xs: "block", sm: "none" }, mb: 0.5, fontWeight: 600 }}
+    >
       {children}
     </Typography>
   );
@@ -94,6 +122,8 @@ export default function VariablesForm() {
     setValue("constraints", nextConstraints);
   }
 
+  const canRemove = variables.length > 1;
+
   return (
     <SectionCard
       step={2}
@@ -106,28 +136,26 @@ export default function VariablesForm() {
           startIcon={<AddIcon />}
           onClick={addVariable}
         >
-          افزودن متغیر
+          افزودن
         </Button>
       }
     >
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: GRID_COLUMNS,
-          alignItems: "center",
-          columnGap: { xs: 1, sm: 2 },
-          rowGap: 1.5,
-        }}
-      >
-        <HeaderCell>متغیر</HeaderCell>
-        <HeaderCell>نوع</HeaderCell>
-        <HeaderCell>کران پایین</HeaderCell>
-        <HeaderCell>کران بالا</HeaderCell>
+      <Box sx={{ ...ROW_GRID, display: { xs: "none", sm: "grid" }, mb: 1.5 }}>
+        <HeaderCell area="symbol">متغیر</HeaderCell>
+        <HeaderCell area="type">نوع</HeaderCell>
+        <HeaderCell area="lower">کران پایین</HeaderCell>
+        <HeaderCell area="upper">کران بالا</HeaderCell>
+      </Box>
 
+      <Stack
+        spacing={{ xs: 2, sm: 1.5 }}
+        divider={<Divider flexItem sx={{ display: { sm: "none" } }} />}
+      >
         {variables.map((variable, index) => (
-          <Box key={variable.id} sx={{ display: "contents" }}>
+          <Box key={variable.id} sx={ROW_GRID}>
             <Box
               sx={{
+                gridArea: "symbol",
                 height: 40,
                 display: "grid",
                 placeItems: "center",
@@ -138,25 +166,45 @@ export default function VariablesForm() {
               <VarSymbol index={index + 1} />
             </Box>
 
-            <FormSelect
-              name={`variables.${index}.type`}
-              options={TYPE_OPTIONS}
-            />
+            <Box sx={{ gridArea: "type", minWidth: 0 }}>
+              <FormSelect
+                name={`variables.${index}.type`}
+                options={TYPE_OPTIONS}
+              />
+            </Box>
 
-            <FormNumber
-              name={`variables.${index}.lowerBound`}
-              placeholder="−∞"
-              step="any"
-            />
+            <Box sx={{ gridArea: "lower", minWidth: 0 }}>
+              <MobileLabel>کران پایین</MobileLabel>
+              <FormNumber
+                name={`variables.${index}.lowerBound`}
+                placeholder="−∞"
+                step="any"
+              />
+            </Box>
 
-            <FormNumber
-              name={`variables.${index}.upperBound`}
-              placeholder="+∞"
-              step="any"
-            />
+            <Box sx={{ gridArea: "upper", minWidth: 0 }}>
+              <MobileLabel>کران بالا</MobileLabel>
+              <FormNumber
+                name={`variables.${index}.upperBound`}
+                placeholder="+∞"
+                step="any"
+              />
+            </Box>
+
+            <Box sx={{ gridArea: "remove" }}>
+              <RemoveButton
+                label={
+                  canRemove
+                    ? `حذف متغیر x${index + 1}`
+                    : "حداقل یک متغیر لازم است"
+                }
+                onClick={() => removeVariable(index)}
+                disabled={!canRemove}
+              />
+            </Box>
           </Box>
         ))}
-      </Box>
+      </Stack>
     </SectionCard>
   );
 }

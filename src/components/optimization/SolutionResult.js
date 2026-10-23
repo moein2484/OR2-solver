@@ -99,7 +99,7 @@ function StatCard({ label, value, hint, tone = "default", children }) {
     <Paper
       variant="outlined"
       sx={{
-        p: 2.5,
+        p: { xs: 2, sm: 2.5 },
         height: "100%",
         borderRadius: "12px",
         ...(tone === "success" && {
@@ -108,7 +108,7 @@ function StatCard({ label, value, hint, tone = "default", children }) {
         }),
       }}
     >
-      <Stack spacing={1.5}>
+      <Stack spacing={{ xs: 1, sm: 1.5 }}>
         <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
           {label}
         </Typography>
@@ -134,38 +134,150 @@ function StatCard({ label, value, hint, tone = "default", children }) {
   );
 }
 
-function StatusChip({ isBest, feasible }) {
-  if (isBest) {
-    return (
-      <Chip
-        size="small"
-        color="success"
-        icon={<EmojiEventsOutlinedIcon />}
-        label="بهترین جواب"
-      />
-    );
-  }
+const STATUS = {
+  best: {
+    label: "بهترین جواب",
+    color: "success",
+    variant: "filled",
+    Icon: EmojiEventsOutlinedIcon,
+  },
+  feasible: {
+    label: "شدنی",
+    color: "success",
+    variant: "outlined",
+    Icon: CheckCircleOutlineIcon,
+  },
+  infeasible: {
+    label: "غیرشدنی",
+    color: "error",
+    variant: "outlined",
+    Icon: CancelOutlinedIcon,
+  },
+};
 
-  if (feasible) {
-    return (
-      <Chip
-        size="small"
-        color="success"
-        variant="outlined"
-        icon={<CheckCircleOutlineIcon />}
-        label="شدنی"
-      />
-    );
-  }
+// در موبایل فقط آیکون وضعیت نمایش داده می‌شود تا جدول جا شود
+function StatusChip({ status }) {
+  const { label, color, variant, Icon } = STATUS[status];
 
   return (
     <Chip
       size="small"
-      color="error"
-      variant="outlined"
-      icon={<CancelOutlinedIcon />}
-      label="غیرشدنی"
+      color={color}
+      variant={variant}
+      icon={<Icon />}
+      label={label}
+      aria-label={label}
+      title={label}
+      sx={{
+        "& .MuiChip-label": { display: { xs: "none", sm: "block" } },
+        "& .MuiChip-icon": { mx: { xs: "5px", sm: undefined } },
+      }}
     />
+  );
+}
+
+const numericCell = {
+  fontVariantNumeric: "tabular-nums",
+  whiteSpace: "nowrap",
+};
+
+function RoundingTable({ candidates, bestSolution }) {
+  const variableCount = candidates[0]?.values.length ?? 0;
+
+  return (
+    <TableContainer
+      sx={{
+        border: "1px solid",
+        borderColor: "divider",
+        borderRadius: "12px",
+        maxHeight: 480,
+      }}
+    >
+      <Table stickyHeader size="small" sx={{ minWidth: "100%" }}>
+        <TableHead>
+          <TableRow>
+            <TableCell align="center" sx={{ width: 56 }}>
+              ردیف
+            </TableCell>
+
+            {Array.from({ length: variableCount }, (_, index) => (
+              <TableCell key={index} align="center" sx={{ minWidth: 56 }}>
+                <VarSymbol index={index + 1} size="1rem" />
+              </TableCell>
+            ))}
+
+            <TableCell align="center" sx={{ minWidth: 72 }}>
+              تابع هدف
+            </TableCell>
+
+            <TableCell align="center" sx={{ width: { xs: 56, sm: 136 } }}>
+              وضعیت
+            </TableCell>
+          </TableRow>
+        </TableHead>
+
+        <TableBody>
+          {candidates.map((candidate, index) => {
+            const isBest =
+              bestSolution &&
+              candidate.feasible &&
+              candidate.values.every(
+                (value, i) => value === bestSolution.values[i],
+              );
+
+            const status = isBest
+              ? "best"
+              : candidate.feasible
+                ? "feasible"
+                : "infeasible";
+
+            return (
+              <TableRow
+                key={index}
+                sx={{
+                  bgcolor: isBest
+                    ? "rgba(var(--mui-palette-success-mainChannel) / 0.07)"
+                    : "inherit",
+                  "&:last-child td": { borderBottom: 0 },
+                }}
+              >
+                <TableCell
+                  align="center"
+                  sx={{ ...numericCell, color: "text.secondary" }}
+                >
+                  {index + 1}
+                </TableCell>
+
+                {candidate.values.map((value, i) => (
+                  <TableCell key={i} align="center" sx={numericCell}>
+                    {formatNumber(value)}
+                  </TableCell>
+                ))}
+
+                <TableCell
+                  align="center"
+                  sx={{
+                    ...numericCell,
+                    fontWeight: 700,
+                    color: candidate.feasible
+                      ? isBest
+                        ? "success.dark"
+                        : "text.primary"
+                      : "text.disabled",
+                  }}
+                >
+                  {formatNumber(candidate.objectiveValue)}
+                </TableCell>
+
+                <TableCell align="center">
+                  <StatusChip status={status} />
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 }
 
@@ -260,79 +372,24 @@ export default function SolutionResult({ result }) {
         )}
 
         <Stack spacing={1.5}>
-          <Typography variant="h6" component="h3">
-            ترکیب‌های گرد کردن
-          </Typography>
-
-          <TableContainer
-            sx={{
-              border: "1px solid",
-              borderColor: "divider",
-              borderRadius: "12px",
-              maxHeight: 480,
-            }}
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{ alignItems: "baseline", justifyContent: "space-between" }}
           >
-            <Table stickyHeader size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell width={64}>ردیف</TableCell>
-                  <TableCell>مقادیر متغیرها</TableCell>
-                  <TableCell width={120}>تابع هدف</TableCell>
-                  <TableCell width={140}>وضعیت</TableCell>
-                </TableRow>
-              </TableHead>
+            <Typography variant="h6" component="h3">
+              ترکیب‌های گرد کردن
+            </Typography>
 
-              <TableBody>
-                {candidates.map((candidate, index) => {
-                  const isBest =
-                    bestSolution &&
-                    candidate.feasible &&
-                    candidate.values.every(
-                      (value, i) => value === bestSolution.values[i],
-                    );
+            <Typography variant="caption" color="text.secondary">
+              {feasibleCount} شدنی از {candidates.length}
+            </Typography>
+          </Stack>
 
-                  return (
-                    <TableRow
-                      key={index}
-                      sx={{
-                        bgcolor: isBest
-                          ? "rgba(var(--mui-palette-success-mainChannel) / 0.06)"
-                          : "inherit",
-                        "&:last-child td": { borderBottom: 0 },
-                      }}
-                    >
-                      <TableCell sx={{ color: "text.secondary" }}>
-                        {index + 1}
-                      </TableCell>
-
-                      <TableCell>
-                        <VariableValues values={candidate.values} />
-                      </TableCell>
-
-                      <TableCell
-                        sx={{
-                          fontWeight: 700,
-                          fontVariantNumeric: "tabular-nums",
-                          color: candidate.feasible
-                            ? "text.primary"
-                            : "text.disabled",
-                        }}
-                      >
-                        {formatNumber(candidate.objectiveValue)}
-                      </TableCell>
-
-                      <TableCell>
-                        <StatusChip
-                          isBest={isBest}
-                          feasible={candidate.feasible}
-                        />
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </TableContainer>
+          <RoundingTable
+            candidates={candidates}
+            bestSolution={bestSolution}
+          />
         </Stack>
 
         <Alert severity="info">

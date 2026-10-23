@@ -28,16 +28,16 @@ export default function ObjectiveForm() {
       title="تابع هدف"
       description="جهت بهینه‌سازی و ضریب هر متغیر در تابع هدف را مشخص کنید."
     >
-      <Stack spacing={3}>
+      <Stack spacing={{ xs: 2, sm: 3 }}>
         <Stack
           direction={{ xs: "column", sm: "row" }}
-          spacing={{ xs: 1, sm: 2 }}
+          spacing={1}
           sx={{ alignItems: { sm: "center" } }}
         >
           <Typography
             component="label"
             variant="subtitle2"
-            sx={{ minWidth: 120 }}
+            sx={{ minWidth: { sm: 120 } }}
           >
             جهت بهینه‌سازی
           </Typography>
@@ -53,7 +53,7 @@ export default function ObjectiveForm() {
 
         <Box
           sx={{
-            p: 2,
+            p: { xs: 1.5, sm: 2 },
             borderRadius: "10px",
             bgcolor: "grey.50",
             border: "1px dashed",
@@ -62,7 +62,7 @@ export default function ObjectiveForm() {
         >
           <ExpressionRow>
             <MathText sx={{ color: "text.primary", fontWeight: 700 }}>
-              {direction === "min" ? "min" : "max"}&nbsp;&nbsp;Z =
+              {direction === "min" ? "min" : "max"}&nbsp;Z&nbsp;=
             </MathText>
 
             <LinearTerms

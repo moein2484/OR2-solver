@@ -77,3 +77,16 @@
   background: var(--form-disabled-bg, #f2f4f7);
   cursor: not-allowed;
 }
+
+@media (max-width: 599.95px) {
+  .actionsContainer {
+    width: 100%;
+  }
+
+  .submitButton,
+  .resetButton {
+    flex: 1;
+    min-width: 0;
+    min-height: 44px;
+  }
+}

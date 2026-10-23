@@ -3,25 +3,16 @@
 import { Box, Button, Divider, Stack, Typography } from "@mui/material";
 
 import AddIcon from "@mui/icons-material/Add";
+import { useFormContext } from "@/component/myForm";
+
 import {
-  FormNumber,
-  FormSelect,
-  useFormContext,
-} from "@/component/myForm";
-
-import { ExpressionRow, LinearTerms, SectionCard } from "./ui";
-
-// علامت‌های ≤ و ≥ در متن راست‌به‌چپ آینه‌ای نمایش داده می‌شوند؛
-// با LRI/PDI جهتشان چپ‌به‌راست ثابت می‌شود
-const OPERATOR_OPTIONS = [
-  { value: "<=", label: "⁦≤⁩" },
-  { value: ">=", label: "⁦≥⁩" },
-  { value: "=", label: "=" },
-];
-
-const rhsInputStyles = {
-  input: { direction: "ltr", textAlign: "center", paddingInline: 8 },
-};
+  CenteredNumberInput,
+  ExpressionRow,
+  LinearTerms,
+  OperatorSelect,
+  RemoveButton,
+  SectionCard,
+} from "./ui";
 
 export default function ConstraintsForm() {
   const { watch, getValues, setValue } = useFormContext();
@@ -66,56 +57,68 @@ export default function ConstraintsForm() {
           startIcon={<AddIcon />}
           onClick={addConstraint}
         >
-          افزودن محدودیت
+          افزودن
         </Button>
       }
     >
       {constraints.length === 0 ? (
-        <Typography variant="body2" color="text.secondary" sx={{ textAlign: "center" }}>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ textAlign: "center", py: 2 }}
+        >
           هنوز محدودیتی اضافه نشده است.
         </Typography>
       ) : (
         <Stack divider={<Divider flexItem />} spacing={2}>
           {constraints.map((constraint, constraintIndex) => (
-            <Stack
+            <Box
               key={constraint.id}
-              direction={{ xs: "column", sm: "row" }}
-              spacing={{ xs: 1.5, sm: 2 }}
-              sx={{ alignItems: { sm: "center" } }}
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr auto", sm: "auto 1fr auto" },
+                gridTemplateAreas: {
+                  xs: '"label remove" "expr expr"',
+                  sm: '"label expr remove"',
+                },
+                alignItems: "center",
+                columnGap: 2,
+                rowGap: 0.5,
+              }}
             >
               <Typography
                 variant="caption"
                 color="text.secondary"
-                sx={{ minWidth: 64, fontWeight: 600 }}
+                sx={{ gridArea: "label", minWidth: { sm: 72 }, fontWeight: 600 }}
               >
                 محدودیت {constraintIndex + 1}
               </Typography>
 
-              <ExpressionRow>
-                <LinearTerms
-                  variables={variables}
-                  namePrefix={`constraints.${constraintIndex}.coefficients`}
-                />
+              <Box sx={{ gridArea: "expr", minWidth: 0 }}>
+                <ExpressionRow>
+                  <LinearTerms
+                    variables={variables}
+                    namePrefix={`constraints.${constraintIndex}.coefficients`}
+                  />
 
-                <Box sx={{ width: 76 }}>
-                  <FormSelect
+                  <OperatorSelect
                     name={`constraints.${constraintIndex}.operator`}
-                    options={OPERATOR_OPTIONS}
-                    required
                   />
-                </Box>
 
-                <Box sx={{ width: 96 }}>
-                  <FormNumber
+                  <CenteredNumberInput
                     name={`constraints.${constraintIndex}.rhs`}
-                    step="any"
-                    required
-                    requiredMessage="الزامی"
-                    styles={rhsInputStyles}
+                    width={{ xs: 60, sm: 88 }}
                   />
-                </Box>
-              </ExpressionRow>
-            </Stack>
+                </ExpressionRow>
+              </Box>
+
+              <Box sx={{ gridArea: "remove" }}>
+                <RemoveButton
+                  label={`حذف محدودیت ${constraintIndex + 1}`}
+                  onClick={() => removeConstraint(constraintIndex)}
+                />
+              </Box>
+            </Box>
           ))}
         </Stack>
       )}
