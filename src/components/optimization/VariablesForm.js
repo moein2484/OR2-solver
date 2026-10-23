@@ -3,33 +3,21 @@
 import { Box, Button, Divider, Stack, Typography } from "@mui/material";
 
 import AddIcon from "@mui/icons-material/Add";
-import {
-  FormNumber,
-  FormSelect,
-  useFormContext,
-} from "@/component/myForm";
+import { FormNumber, useFormContext } from "@/component/myForm";
 
 import { RemoveButton, SectionCard, VarSymbol } from "./ui";
 
-const TYPE_OPTIONS = [
-  { value: "integer", label: "عدد صحیح" },
-  { value: "binary", label: "دودویی" },
-];
-
-// دسکتاپ: یک ردیف جدولی | موبایل: دو خط (نماد، نوع، حذف / کران‌ها)
+// همه‌ی متغیرها عدد صحیح هستند؛ هر ردیف: نماد | کران پایین | کران بالا | حذف
+// (در موبایل لیبل کران‌ها بالای اینپوت است، پس ردیف از پایین هم‌تراز می‌شود)
 const ROW_GRID = {
   display: "grid",
   gridTemplateColumns: {
     xs: "40px repeat(2, minmax(0, 1fr)) 40px",
-    sm: "56px minmax(0, 1.2fr) repeat(2, minmax(0, 1fr)) 40px",
+    sm: "56px repeat(2, minmax(0, 1fr)) 40px",
   },
-  gridTemplateAreas: {
-    xs: '"symbol type type remove" "lower lower upper upper"',
-    sm: '"symbol type lower upper remove"',
-  },
-  alignItems: "center",
+  gridTemplateAreas: '"symbol lower upper remove"',
+  alignItems: "end",
   columnGap: { xs: 1, sm: 2 },
-  rowGap: 1.5,
 };
 
 function HeaderCell({ area, children }) {
@@ -128,7 +116,7 @@ export default function VariablesForm() {
     <SectionCard
       step={2}
       title="متغیرهای تصمیم"
-      description="نوع و کران‌های هر متغیر. کران خالی یعنی بدون محدودیت."
+      description="همه‌ی متغیرها عدد صحیح هستند. کران خالی یعنی بدون محدودیت."
       action={
         <Button
           variant="outlined"
@@ -142,7 +130,6 @@ export default function VariablesForm() {
     >
       <Box sx={{ ...ROW_GRID, display: { xs: "none", sm: "grid" }, mb: 1.5 }}>
         <HeaderCell area="symbol">متغیر</HeaderCell>
-        <HeaderCell area="type">نوع</HeaderCell>
         <HeaderCell area="lower">کران پایین</HeaderCell>
         <HeaderCell area="upper">کران بالا</HeaderCell>
       </Box>
@@ -164,13 +151,6 @@ export default function VariablesForm() {
               }}
             >
               <VarSymbol index={index + 1} />
-            </Box>
-
-            <Box sx={{ gridArea: "type", minWidth: 0 }}>
-              <FormSelect
-                name={`variables.${index}.type`}
-                options={TYPE_OPTIONS}
-              />
             </Box>
 
             <Box sx={{ gridArea: "lower", minWidth: 0 }}>
