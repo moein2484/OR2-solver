@@ -1,0 +1,42 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* کنترل‌های فرم به‌طور پیش‌فرض فونت را به ارث نمی‌برند */
+input,
+button,
+select,
+textarea {
+  font: inherit;
+  line-height: 1.5;
+}
+
+/* حذف فلش‌های افزایش/کاهش اینپوت عددی */
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+::selection {
+  background: rgba(var(--mui-palette-primary-mainChannel) / 0.18);
+}

@@ -4,7 +4,6 @@ import {
   Alert,
   Box,
   Chip,
-  Divider,
   Grid,
   Paper,
   Stack,
@@ -17,59 +16,156 @@ import {
   Typography,
 } from "@mui/material";
 
-// import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutlineRounded";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import EmojiEventsOutlinedIcon from "@mui/icons-material/EmojiEventsOutlined";
+
+import { VarSymbol } from "./ui";
 
 function formatNumber(value) {
   if (typeof value !== "number" || !Number.isFinite(value)) {
     return "—";
   }
 
-  return Number(value.toFixed(6)).toString();
+  return Number(value.toFixed(4)).toString();
 }
 
-function formatVariables(values) {
-  if (!values) return "—";
+function relativeGap(lpValue, roundedValue) {
+  if (
+    typeof roundedValue !== "number" ||
+    typeof lpValue !== "number" ||
+    lpValue === 0
+  ) {
+    return null;
+  }
 
-  return values
-    .map((value, index) => `x${index + 1} = ${formatNumber(value)}`)
-    .join(" , ");
+  return (Math.abs(lpValue - roundedValue) / Math.abs(lpValue)) * 100;
 }
 
-function ResultCard({ title, value, variables, highlighted = false }) {
+function VariableValues({ values }) {
+  if (!values) {
+    return (
+      <Typography variant="body2" color="text.secondary">
+        —
+      </Typography>
+    );
+  }
+
+  return (
+    <Box
+      dir="ltr"
+      sx={{
+        display: "flex",
+        flexWrap: "wrap",
+        justifyContent: "flex-end",
+        gap: 0.75,
+      }}
+    >
+      {values.map((value, index) => (
+        <Box
+          key={index}
+          sx={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 0.75,
+            px: 1,
+            height: 28,
+            borderRadius: "8px",
+            bgcolor: "grey.100",
+            fontSize: "0.8125rem",
+            fontWeight: 600,
+          }}
+        >
+          <VarSymbol index={index + 1} size="0.9375rem" />
+          <Box component="span" sx={{ color: "text.secondary" }}>
+            =
+          </Box>
+          {formatNumber(value)}
+        </Box>
+      ))}
+    </Box>
+  );
+}
+
+function StatCard({ label, value, hint, tone = "default", children }) {
+  const toneColor = {
+    default: "text.primary",
+    primary: "primary.main",
+    success: "success.main",
+    warning: "warning.main",
+  }[tone];
+
   return (
     <Paper
       variant="outlined"
       sx={{
-        p: 3,
-        borderRadius: 3,
+        p: 2.5,
         height: "100%",
-        bgcolor: highlighted ? "success.50" : "background.paper",
-        borderColor: highlighted ? "success.main" : "divider",
+        borderRadius: "12px",
+        ...(tone === "success" && {
+          borderColor: "success.main",
+          bgcolor: "rgba(var(--mui-palette-success-mainChannel) / 0.04)",
+        }),
       }}
     >
-      <Stack spacing={2}>
-        <Typography color="text.secondary" fontWeight={600}>
-          {title}
+      <Stack spacing={1.5}>
+        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
+          {label}
         </Typography>
 
         <Typography
           variant="h4"
-          fontWeight={800}
-          color={highlighted ? "success.main" : "text.primary"}
+          component="p"
+          color={toneColor}
+          sx={{ fontVariantNumeric: "tabular-nums" }}
         >
-          {formatNumber(value)}
+          {value}
         </Typography>
 
-        <Typography
-          fontFamily="monospace"
-          sx={{ direction: "ltr", textAlign: "left" }}
-        >
-          {formatVariables(variables)}
-        </Typography>
+        {hint && (
+          <Typography variant="caption" color="text.secondary">
+            {hint}
+          </Typography>
+        )}
+
+        {children}
       </Stack>
     </Paper>
+  );
+}
+
+function StatusChip({ isBest, feasible }) {
+  if (isBest) {
+    return (
+      <Chip
+        size="small"
+        color="success"
+        icon={<EmojiEventsOutlinedIcon />}
+        label="بهترین جواب"
+      />
+    );
+  }
+
+  if (feasible) {
+    return (
+      <Chip
+        size="small"
+        color="success"
+        variant="outlined"
+        icon={<CheckCircleOutlineIcon />}
+        label="شدنی"
+      />
+    );
+  }
+
+  return (
+    <Chip
+      size="small"
+      color="error"
+      variant="outlined"
+      icon={<CancelOutlinedIcon />}
+      label="غیرشدنی"
+    />
   );
 }
 
@@ -81,7 +177,8 @@ export default function SolutionResult({ result }) {
   if (lpResult?.status !== "optimal") {
     return (
       <Alert severity="warning">
-        حل‌کننده نتوانست جواب بهینه LP را پیدا کند.
+        حل‌کننده نتوانست جواب بهینه LP را پیدا کند. ممکن است مسئله نشدنی یا
+        بی‌کران باشد.
       </Alert>
     );
   }
@@ -93,132 +190,150 @@ export default function SolutionResult({ result }) {
     (candidate) => candidate.feasible,
   ).length;
 
+  const gap = relativeGap(
+    lpResult.objectiveValue,
+    bestSolution?.objectiveValue,
+  );
+
   return (
-    <Paper elevation={0} sx={{ p: { xs: 2, md: 4 }, borderRadius: 4 }}>
-      <Stack spacing={3}>
-        <Stack direction="row" justifyContent="space-between">
-          <Typography variant="h5" fontWeight={800}>
+    <Paper
+      component="section"
+      variant="outlined"
+      sx={{ borderRadius: "14px", overflow: "hidden" }}
+    >
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={1.5}
+        sx={{
+          alignItems: { sm: "center" },
+          justifyContent: "space-between",
+          px: { xs: 2, sm: 3 },
+          py: 2,
+          borderBottom: "1px solid",
+          borderColor: "divider",
+        }}
+      >
+        <Box>
+          <Typography variant="h5" component="h2">
             نتایج حل مسئله
           </Typography>
+          <Typography variant="body2" color="text.secondary">
+            مقایسه‌ی جواب LP آزادشده با بهترین جواب عدد صحیح گردشده
+          </Typography>
+        </Box>
 
-          <Chip
-            color={bestSolution ? "success" : "warning"}
-            label={bestSolution ? "محاسبه موفق" : "جواب گرد‌شده یافت نشد"}
-          />
-        </Stack>
+        <Chip
+          color={bestSolution ? "success" : "warning"}
+          label={bestSolution ? "محاسبه موفق" : "جواب گردشده یافت نشد"}
+          sx={{ alignSelf: { xs: "flex-start", sm: "center" } }}
+        />
+      </Stack>
 
+      <Stack spacing={3} sx={{ p: { xs: 2, sm: 3 } }}>
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, md: 6 }}>
-            <ResultCard
-              title="جواب بهینه LP Relaxation"
-              value={lpResult.objectiveValue}
-              variables={lpResult.values}
-            />
+            <StatCard
+              label="جواب بهینه LP Relaxation"
+              value={formatNumber(lpResult.objectiveValue)}
+              tone="primary"
+            >
+              <VariableValues values={lpResult.values} />
+            </StatCard>
           </Grid>
 
           <Grid size={{ xs: 12, md: 6 }}>
-            <ResultCard
-              title="بهترین جواب گرد‌شده"
-              value={bestSolution?.objectiveValue}
-              variables={bestSolution?.values}
-              highlighted={Boolean(bestSolution)}
-            />
+            <StatCard
+              label="بهترین جواب گردشده"
+              value={formatNumber(bestSolution?.objectiveValue)}
+              tone={bestSolution ? "success" : "warning"}
+            >
+              <VariableValues values={bestSolution?.values} />
+            </StatCard>
           </Grid>
         </Grid>
 
         {!bestSolution && (
           <Alert severity="warning">
-            هیچ جواب شدنی از ترکیب‌های گرد کردن پیدا نشد. این به معنی نشدنی بودن
-            مسئله عدد صحیح اصلی نیست.
+            هیچ جواب شدنی از ترکیب‌های گرد کردن پیدا نشد. این به معنی نشدنی
+            بودن مسئله عدد صحیح اصلی نیست.
           </Alert>
         )}
 
-        <Divider />
-
-        <Stack direction="row" justifyContent="space-between">
-          <Typography variant="h6" fontWeight={700}>
+        <Stack spacing={1.5}>
+          <Typography variant="h6" component="h3">
             ترکیب‌های گرد کردن
           </Typography>
 
-          <Typography color="text.secondary">
-            {feasibleCount} جواب شدنی از {candidates.length} ترکیب
-          </Typography>
-        </Stack>
+          <TableContainer
+            sx={{
+              border: "1px solid",
+              borderColor: "divider",
+              borderRadius: "12px",
+              maxHeight: 480,
+            }}
+          >
+            <Table stickyHeader size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell width={64}>ردیف</TableCell>
+                  <TableCell>مقادیر متغیرها</TableCell>
+                  <TableCell width={120}>تابع هدف</TableCell>
+                  <TableCell width={140}>وضعیت</TableCell>
+                </TableRow>
+              </TableHead>
 
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>ردیف</TableCell>
-                <TableCell>مقادیر متغیرها</TableCell>
-                <TableCell>تابع هدف</TableCell>
-                <TableCell>وضعیت</TableCell>
-              </TableRow>
-            </TableHead>
+              <TableBody>
+                {candidates.map((candidate, index) => {
+                  const isBest =
+                    bestSolution &&
+                    candidate.feasible &&
+                    candidate.values.every(
+                      (value, i) => value === bestSolution.values[i],
+                    );
 
-            <TableBody>
-              {candidates.map((candidate, index) => {
-                const isBest =
-                  bestSolution &&
-                  candidate.feasible &&
-                  candidate.values.every(
-                    (value, i) => value === bestSolution.values[i],
-                  );
+                  return (
+                    <TableRow
+                      key={index}
+                      sx={{
+                        bgcolor: isBest
+                          ? "rgba(var(--mui-palette-success-mainChannel) / 0.06)"
+                          : "inherit",
+                        "&:last-child td": { borderBottom: 0 },
+                      }}
+                    >
+                      <TableCell sx={{ color: "text.secondary" }}>
+                        {index + 1}
+                      </TableCell>
 
-                return (
-                  <TableRow
-                    key={index}
-                    sx={{
-                      bgcolor: isBest ? "action.selected" : "inherit",
-                    }}
-                  >
-                    <TableCell>{index + 1}</TableCell>
+                      <TableCell>
+                        <VariableValues values={candidate.values} />
+                      </TableCell>
 
-                    <TableCell>
-                      <Typography
-                        fontFamily="monospace"
-                        sx={{ direction: "ltr", textAlign: "left" }}
+                      <TableCell
+                        sx={{
+                          fontWeight: 700,
+                          fontVariantNumeric: "tabular-nums",
+                          color: candidate.feasible
+                            ? "text.primary"
+                            : "text.disabled",
+                        }}
                       >
-                        {formatVariables(candidate.values)}
-                      </Typography>
-                    </TableCell>
+                        {formatNumber(candidate.objectiveValue)}
+                      </TableCell>
 
-                    <TableCell>
-                      {formatNumber(candidate.objectiveValue)}
-                    </TableCell>
-
-                    <TableCell>
-                      {isBest ? (
-                        <Chip
-                          size="small"
-                          color="success"
-                          icon={<EmojiEventsOutlinedIcon />}
-                          label="بهترین جواب"
+                      <TableCell>
+                        <StatusChip
+                          isBest={isBest}
+                          feasible={candidate.feasible}
                         />
-                      ) : candidate.feasible ? (
-                        <Chip
-                          size="small"
-                          color="success"
-                          variant="outlined"
-                        //   icon={<CheckCircleOutlineIcon />}
-                          label="شدنی"
-                        />
-                      ) : (
-                        <Chip
-                          size="small"
-                          color="error"
-                          variant="outlined"
-                          icon={<CancelOutlinedIcon />}
-                          label="غیرشدنی"
-                        />
-                      )}
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </TableContainer>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Stack>
 
         <Alert severity="info">
           این جواب حاصل از روش تقریب و گرد کردن است و لزوماً جواب بهینه سراسری

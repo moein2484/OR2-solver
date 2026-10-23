@@ -1,22 +1,33 @@
-
 "use client";
 
-import {
-  Box,
-  Button,
-  Paper,
-  Stack,
-  Typography,
-  IconButton,
-} from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 
 import AddIcon from "@mui/icons-material/Add";
-// import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";F
 import {
   FormNumber,
   FormSelect,
   useFormContext,
 } from "@/component/myForm";
+
+import { SectionCard, VarSymbol } from "./ui";
+
+const TYPE_OPTIONS = [
+  { value: "integer", label: "عدد صحیح" },
+  { value: "binary", label: "دودویی" },
+];
+
+const GRID_COLUMNS = {
+  xs: "40px repeat(3, minmax(0, 1fr))",
+  sm: "56px minmax(0, 1.2fr) repeat(2, minmax(0, 1fr))",
+};
+
+function HeaderCell({ children }) {
+  return (
+    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+      {children}
+    </Typography>
+  );
+}
 
 export default function VariablesForm() {
   const { watch, getValues, setValue } = useFormContext();
@@ -84,66 +95,68 @@ export default function VariablesForm() {
   }
 
   return (
-    <Paper variant="outlined" sx={{ p: 3, borderRadius: 3 }}>
-      <Stack spacing={2}>
-        <Typography fontWeight={700}>متغیرهای تصمیم</Typography>
-
-        {variables.map((variable, index) => (
-          <Stack
-            key={variable.id}
-            direction={{ xs: "column", md: "row" }}
-            spacing={2}
-            alignItems={{ md: "center" }}
-          >
-            <Typography fontWeight={700}>
-              x<sub>{index + 1}</sub>
-            </Typography>
-
-            <Box sx={{ minWidth: 150 }}>
-              <FormSelect
-                name={`variables.${index}.type`}
-                options={[
-                  { value: "integer", label: "عدد صحیح" },
-                  { value: "binary", label: "دودویی" },
-                ]}
-              />
-            </Box>
-
-            <Box sx={{ width: 110 }}>
-              <FormNumber
-                name={`variables.${index}.lowerBound`}
-                label="کران پایین"
-                step="any"
-              />
-            </Box>
-
-            <Box sx={{ width: 110 }}>
-              <FormNumber
-                name={`variables.${index}.upperBound`}
-                label="کران بالا"
-                step="any"
-              />
-            </Box>
-
-            {/* <IconButton
-              color="error"
-              disabled={variables.length <= 1}
-              onClick={() => removeVariable(index)}
-            >
-              <RemoveCircleOutlineIcon />
-            </IconButton> */}
-          </Stack>
-        ))}
-
+    <SectionCard
+      step={2}
+      title="متغیرهای تصمیم"
+      description="نوع و کران‌های هر متغیر. کران خالی یعنی بدون محدودیت."
+      action={
         <Button
           variant="outlined"
+          size="small"
           startIcon={<AddIcon />}
           onClick={addVariable}
-          sx={{ alignSelf: "flex-start" }}
         >
           افزودن متغیر
         </Button>
-      </Stack>
-    </Paper>
+      }
+    >
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: GRID_COLUMNS,
+          alignItems: "center",
+          columnGap: { xs: 1, sm: 2 },
+          rowGap: 1.5,
+        }}
+      >
+        <HeaderCell>متغیر</HeaderCell>
+        <HeaderCell>نوع</HeaderCell>
+        <HeaderCell>کران پایین</HeaderCell>
+        <HeaderCell>کران بالا</HeaderCell>
+
+        {variables.map((variable, index) => (
+          <Box key={variable.id} sx={{ display: "contents" }}>
+            <Box
+              sx={{
+                height: 40,
+                display: "grid",
+                placeItems: "center",
+                borderRadius: "10px",
+                bgcolor: "grey.100",
+              }}
+            >
+              <VarSymbol index={index + 1} />
+            </Box>
+
+            <FormSelect
+              name={`variables.${index}.type`}
+              options={TYPE_OPTIONS}
+            />
+
+            <FormNumber
+              name={`variables.${index}.lowerBound`}
+              placeholder="−∞"
+              step="any"
+            />
+
+            <FormNumber
+              name={`variables.${index}.upperBound`}
+              placeholder="+∞"
+              step="any"
+            />
+          </Box>
+        ))}
+      </Box>
+    </SectionCard>
   );
 }

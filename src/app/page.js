@@ -1,33 +1,57 @@
-
-import { Box, Container, Typography } from "@mui/material";
+import { Box, Chip, Container, Stack, Typography } from "@mui/material";
+import FunctionsRoundedIcon from "@mui/icons-material/FunctionsRounded";
 
 import ModelForm from "@/components/optimization/ModelForm";
 
+const METHOD_TAGS = ["LP Relaxation", "Floor / Ceil Rounding", "GLPK"];
+
 export default function HomePage() {
   return (
-    <Box
-      dir="rtl"
-      sx={{
-        minHeight: "100vh",
-        bgcolor: "#f5f7fc",
-        py: { xs: 3, md: 7 },
-      }}
-    >
+    <Box sx={{ minHeight: "100vh", py: { xs: 3, md: 6 } }}>
       <Container maxWidth="lg">
-        <Box mb={4}>
-          <Typography
-            variant="h3"
-            fontWeight={900}
-            sx={{ fontSize: { xs: 28, md: 38 } }}
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          sx={{ mb: { xs: 3, md: 4 }, alignItems: { sm: "center" } }}
+          spacing={2}
+        >
+          <Box
+            sx={{
+              width: 52,
+              height: 52,
+              flexShrink: 0,
+              display: "grid",
+              placeItems: "center",
+              borderRadius: "14px",
+              bgcolor: "primary.main",
+              color: "primary.contrastText",
+            }}
           >
-            OR2 Solver
-          </Typography>
+            <FunctionsRoundedIcon fontSize="large" />
+          </Box>
 
-          <Typography color="text.secondary" mt={1}>
-            حل تقریبی مسائل برنامه‌ریزی عدد صحیح با LP Relaxation
-            و روش گرد کردن
-          </Typography>
-        </Box>
+          <Box sx={{ flex: 1 }}>
+            <Typography variant="h4" component="h1">
+              OR2 Solver
+            </Typography>
+
+            <Typography color="text.secondary">
+              حل تقریبی مسائل برنامه‌ریزی عدد صحیح با LP Relaxation و روش گرد
+              کردن
+            </Typography>
+          </Box>
+
+          <Stack direction="row" useFlexGap spacing={1} sx={{ flexWrap: "wrap" }}>
+            {METHOD_TAGS.map((tag) => (
+              <Chip
+                key={tag}
+                label={tag}
+                size="small"
+                variant="outlined"
+                sx={{ bgcolor: "background.paper" }}
+              />
+            ))}
+          </Stack>
+        </Stack>
 
         <ModelForm />
       </Container>

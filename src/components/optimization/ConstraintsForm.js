@@ -1,22 +1,27 @@
-
 "use client";
 
-import {
-  Box,
-  Button,
-  IconButton,
-  Paper,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Divider, Stack, Typography } from "@mui/material";
 
 import AddIcon from "@mui/icons-material/Add";
-// import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import {
   FormNumber,
   FormSelect,
   useFormContext,
 } from "@/component/myForm";
+
+import { ExpressionRow, LinearTerms, SectionCard } from "./ui";
+
+// علامت‌های ≤ و ≥ در متن راست‌به‌چپ آینه‌ای نمایش داده می‌شوند؛
+// با LRI/PDI جهتشان چپ‌به‌راست ثابت می‌شود
+const OPERATOR_OPTIONS = [
+  { value: "<=", label: "⁦≤⁩" },
+  { value: ">=", label: "⁦≥⁩" },
+  { value: "=", label: "=" },
+];
+
+const rhsInputStyles = {
+  input: { direction: "ltr", textAlign: "center", paddingInline: 8 },
+};
 
 export default function ConstraintsForm() {
   const { watch, getValues, setValue } = useFormContext();
@@ -50,105 +55,70 @@ export default function ConstraintsForm() {
   }
 
   return (
-    <Paper variant="outlined" sx={{ p: 3, borderRadius: 3 }}>
-      <Stack spacing={3}>
-        <Typography fontWeight={700}>محدودیت‌ها</Typography>
-
-        {constraints.map((constraint, constraintIndex) => (
-          <Box
-            key={constraint.id}
-            sx={{
-              p: 2,
-              border: "1px solid",
-              borderColor: "divider",
-              borderRadius: 2,
-            }}
-          >
-            <Stack spacing={2}>
-              <Typography variant="caption" color="text.secondary">
+    <SectionCard
+      step={3}
+      title="محدودیت‌ها"
+      description="ضرایب سمت چپ، نوع نامساوی و مقدار سمت راست هر محدودیت."
+      action={
+        <Button
+          variant="outlined"
+          size="small"
+          startIcon={<AddIcon />}
+          onClick={addConstraint}
+        >
+          افزودن محدودیت
+        </Button>
+      }
+    >
+      {constraints.length === 0 ? (
+        <Typography variant="body2" color="text.secondary" sx={{ textAlign: "center" }}>
+          هنوز محدودیتی اضافه نشده است.
+        </Typography>
+      ) : (
+        <Stack divider={<Divider flexItem />} spacing={2}>
+          {constraints.map((constraint, constraintIndex) => (
+            <Stack
+              key={constraint.id}
+              direction={{ xs: "column", sm: "row" }}
+              spacing={{ xs: 1.5, sm: 2 }}
+              sx={{ alignItems: { sm: "center" } }}
+            >
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ minWidth: 64, fontWeight: 600 }}
+              >
                 محدودیت {constraintIndex + 1}
               </Typography>
 
-              <Box
-                dir="ltr"
-                sx={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  alignItems: "center",
-                  gap: 1.5,
-                }}
-              >
-                {variables.map((variable, variableIndex) => (
-                  <Box
-                    key={variable.id}
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
-                    }}
-                  >
-                    {variableIndex > 0 && (
-                      <Typography>+</Typography>
-                    )}
+              <ExpressionRow>
+                <LinearTerms
+                  variables={variables}
+                  namePrefix={`constraints.${constraintIndex}.coefficients`}
+                />
 
-                    <Box sx={{ width: 76 }}>
-                      <FormNumber
-                        name={
-                          `constraints.${constraintIndex}` +
-                          `.coefficients.${variableIndex}`
-                        }
-                        step="any"
-                        required
-                      />
-                    </Box>
-
-                    <Typography fontWeight={700}>
-                      x<sub>{variableIndex + 1}</sub>
-                    </Typography>
-                  </Box>
-                ))}
-
-                <Box sx={{ minWidth: 94 }}>
+                <Box sx={{ width: 76 }}>
                   <FormSelect
                     name={`constraints.${constraintIndex}.operator`}
-                    options={[
-                      { value: "<=", label: "≤" },
-                      { value: ">=", label: "≥" },
-                      { value: "=", label: "=" },
-                    ]}
+                    options={OPERATOR_OPTIONS}
                     required
                   />
                 </Box>
 
-                <Box sx={{ width: 90 }}>
+                <Box sx={{ width: 96 }}>
                   <FormNumber
                     name={`constraints.${constraintIndex}.rhs`}
                     step="any"
                     required
+                    requiredMessage="الزامی"
+                    styles={rhsInputStyles}
                   />
                 </Box>
-
-                {/* <IconButton
-                  color="error"
-                  onClick={() => removeConstraint(constraintIndex)}
-                  aria-label="حذف محدودیت"
-                >
-                  <RemoveCircleOutlineIcon />
-                </IconButton> */}
-              </Box>
+              </ExpressionRow>
             </Stack>
-          </Box>
-        ))}
-
-        <Button
-          variant="outlined"
-          startIcon={<AddIcon />}
-          onClick={addConstraint}
-          sx={{ alignSelf: "flex-start" }}
-        >
-          افزودن محدودیت
-        </Button>
-      </Stack>
-    </Paper>
+          ))}
+        </Stack>
+      )}
+    </SectionCard>
   );
 }

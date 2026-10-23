@@ -1,12 +1,20 @@
-
 "use client";
 
-import { Box, Paper, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
+
+import { FormSelect, useFormContext } from "@/component/myForm";
 
 import {
-  FormNumber,
-  useFormContext,
-} from "@/component/myForm";
+  ExpressionRow,
+  LinearTerms,
+  MathText,
+  SectionCard,
+} from "./ui";
+
+const DIRECTION_OPTIONS = [
+  { value: "max", label: "بیشینه‌سازی (Max)" },
+  { value: "min", label: "کمینه‌سازی (Min)" },
+];
 
 export default function ObjectiveForm() {
   const { watch } = useFormContext();
@@ -15,49 +23,55 @@ export default function ObjectiveForm() {
   const direction = watch("direction");
 
   return (
-    <Paper variant="outlined" sx={{ p: 3, borderRadius: 3 }}>
-      <Stack spacing={2}>
-        <Typography fontWeight={700}>تابع هدف</Typography>
-
-        <Box
-          dir="ltr"
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: 1.5,
-          }}
+    <SectionCard
+      step={1}
+      title="تابع هدف"
+      description="جهت بهینه‌سازی و ضریب هر متغیر در تابع هدف را مشخص کنید."
+    >
+      <Stack spacing={3}>
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={{ xs: 1, sm: 2 }}
+          sx={{ alignItems: { sm: "center" } }}
         >
-          <Typography fontWeight={800}>
-            {direction === "min" ? "Min" : "Max"} Z =
+          <Typography
+            component="label"
+            variant="subtitle2"
+            sx={{ minWidth: 120 }}
+          >
+            جهت بهینه‌سازی
           </Typography>
 
-          {variables.map((variable, index) => (
-            <Box
-              key={variable.id}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
-              }}
-            >
-              {index > 0 && <Typography>+</Typography>}
+          <Box sx={{ width: { xs: "100%", sm: 240 } }}>
+            <FormSelect
+              name="direction"
+              options={DIRECTION_OPTIONS}
+              required
+            />
+          </Box>
+        </Stack>
 
-              <Box sx={{ width: 76 }}>
-                <FormNumber
-                  name={`objective.coefficients.${index}`}
-                  step="any"
-                  required
-                />
-              </Box>
+        <Box
+          sx={{
+            p: 2,
+            borderRadius: "10px",
+            bgcolor: "grey.50",
+            border: "1px dashed",
+            borderColor: "divider",
+          }}
+        >
+          <ExpressionRow>
+            <MathText sx={{ color: "text.primary", fontWeight: 700 }}>
+              {direction === "min" ? "min" : "max"}&nbsp;&nbsp;Z =
+            </MathText>
 
-              <Typography fontWeight={700}>
-                x<sub>{index + 1}</sub>
-              </Typography>
-            </Box>
-          ))}
+            <LinearTerms
+              variables={variables}
+              namePrefix="objective.coefficients"
+            />
+          </ExpressionRow>
         </Box>
       </Stack>
-    </Paper>
+    </SectionCard>
   );
 }
